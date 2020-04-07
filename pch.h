@@ -10,6 +10,5 @@
 #define PCH_H
 
 // TODO: add headers that you want to pre-compile here
-#define M_PI           3.14159265358979323846f
 
 #endif //PCH_H

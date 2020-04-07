@@ -1,23 +1,26 @@
-#ifndef RAYH
-#define RAYH
+#pragma once
 
 #include "vec3.h"
+
 
 class ray
 {
     public:
         ray() {}
-        ray(const vec3& a, const vec3& b)
-        {
-            A = a;
-            B = b;
-        }
-        vec3 origin() const { return A; }
-        vec3 direction() const { return B; }
-        vec3 point_at_parameter(float t) const { return A + t*B; }
+        ray(const vec3& origin, const vec3& direction)
+            : orig(origin), dir(direction), tm(0)
+        {}
 
-        vec3 A;
-        vec3 B;
+        ray(const vec3& origin, const vec3& direction, double time)
+            : orig(origin), dir(direction), tm(time)
+        {}
+
+        vec3 origin() const { return orig; }
+        vec3 direction() const { return dir; }
+        double time() const { return tm; }
+        vec3 at(double t) const { return orig + t*dir; }
+
+        vec3 orig;
+        vec3 dir;
+        double tm;
 };
-
-#endif

@@ -2,25 +2,30 @@
 
 #include <fstream>
 #include <chrono>
-#include <limits>
 
-#include "material.h"
+#include "rtweekend.h"
 #include "camera.h"
-#include "sphere.h"
 #include "hitable_list.h"
+#include "material.h"
+#include "sphere.h"
 
 
-vec3 color(const ray& r, hitable *world, int depth)
+vec3 ray_color(const ray& r, hitable &world, int depth)
 {
     hit_record rec;
+
+    // If we've exceeded the ray bounce limit, no more light is gahtered.
+    if (depth <= 0)
+        return vec3(0, 0, 0);
+
     // use 0.001 instead of 0 to avoid shadow acne (in this case leads to exception (don't know why))
-    if (world->hit(r, 0.001f, std::numeric_limits<float>::max(), rec))
+    if (world.hit(r, 0.001, infinity, rec))
     {
         ray scattered;
         vec3 attenuation;
-        if (depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered))
+        if (rec.mat_ptr->scatter(r, rec, attenuation, scattered))
         {
-            return attenuation*color(scattered, world, depth+1);
+            return attenuation * ray_color(scattered, world, depth-1);
         }
         else
         {
@@ -30,52 +35,54 @@ vec3 color(const ray& r, hitable *world, int depth)
     else
     {
         vec3 unit_direction = unit_vector(r.direction());
-        float t = 0.5f * (unit_direction.y() + 1.0f);
+        double t = 0.5 * (unit_direction.y() + 1.0);
         // Linear interpolate between white and some other color
-        return (1.0f-t)*vec3(1.0f, 1.0f, 1.0f) + t*vec3(0.5f, 0.7f, 1.0f);
+        return (1.0-t)*vec3(1.0, 1.0, 1.0) + t*vec3(0.5, 0.7, 1.0);
     }
 }
 
 
-hitable* random_scene()
+hitable_list random_scene()
 {
-    int n = 500;
-    hitable** list = new hitable*[n+1];
-    list[0] = new sphere(vec3(0, -1000, 0), 1000, new lambertian(vec3(0.4f, 0.4f, 0.4f)));
+    hitable_list world;
+    world.add(make_shared<sphere>(vec3(0, -1000, 0), 1000, make_shared<lambertian>(vec3(0.5, 0.5, 0.5))));
+
     int i = 1;
     for (int a = -11; a < 11; a++)
     {
         for (int b = -11; b < 11; b++)
         {
-            float choose_mat = (float)dis(gen);
-            vec3 center(a+0.9f*(float)dis(gen), 0.2f, b+0.9f*(float)dis(gen));
-            if ((center-vec3(4.f,0.2f,0.f)).length() > 0.9f)
+            double choose_mat = random_double();
+            vec3 center(a + 0.9f * random_double(), 0.2f, b + 0.9f * random_double());
+            if ((center - vec3(4, 0.2, 0)).length() > 0.9)
             {
                 // diffuse
                 if (choose_mat < 0.8)
                 {
-                    list[i++] = new sphere(center, 0.2f, new lambertian(vec3((float)dis(gen)*(float)dis(gen), (float)dis(gen)*(float)dis(gen), (float)dis(gen)*(float)dis(gen))));
+                    auto albedo = vec3::random() * vec3::random();
+                    world.add(make_shared<sphere>(center, 0.2, make_shared<lambertian>(albedo)));
                 }
                 // metal
                 else if (choose_mat < 0.95)
                 {
-                    list[i++] = new sphere(center, 0.2f, new metal(vec3(0.5f*(1+ (float)dis(gen)), 0.5f*(1+ (float)dis(gen)), 0.5f*(1+ (float)dis(gen))), 0.5f*(float)dis(gen)));
+                    auto albedo = vec3::random(0.5, 1);
+                    auto fuzz = random_double(0, 0.5);
+                    world.add(make_shared<sphere>(center, 0.2, make_shared<metal>(albedo, fuzz)));
                 }
                 // glass
                 else
                 {
-                    // vec3 center_new(vec3(center.x(), 0.16, center.z()));
-                    list[i++] = new sphere(center, 0.2f, new dielectric(1.5f));
+                    world.add(make_shared<sphere>(center, 0.2, make_shared<dielectric>(1.5)));
                 }
             }
         }
     }
 
-    list[i++] = new sphere(vec3(0, 1, 0), 1.0f, new dielectric(1.5f));
-    list[i++] = new sphere(vec3(-4, 1, 0), 1.0f, new lambertian(vec3(0.1f, 0.2f, 0.5f)));
-    list[i++] = new sphere(vec3(4, 1, 0), 1.0f, new metal(vec3(0.7f, 0.6f, 0.5f), 0.0f));
+    world.add(make_shared<sphere>(vec3(0, 1, 0), 1.0, make_shared<dielectric>(1.5)));
+    world.add(make_shared<sphere>(vec3(-4, 1, 0), 1.0, make_shared<lambertian>(vec3(0.1, 0.2, 0.5))));
+    world.add(make_shared<sphere>(vec3(4, 1, 0), 1.0, make_shared<metal>(vec3(0.7, 0.6, 0.5), 0.0)));
 
-    return new hitable_list(list, i);
+    return world;
 }
 
 
@@ -85,10 +92,13 @@ int main()
     std::ofstream output;
     output.open("picture.ppm");
 
-    int nx = 400;
-    int ny = 200;
-    int ns = 5;
-    output << "P3\n" << nx << " " << ny << "\n255\n";
+    const int image_width = 1200;
+    const int image_height = 800;
+    const int samples_per_pixel = 10;
+    const int max_depth = 50;
+    const auto aspect_ratio = double(image_width) / double(image_height);
+
+    output << "P3\n" << image_width << " " << image_height << "\n255\n";
 
 
     // hitable *list[5];
@@ -98,46 +108,40 @@ int main()
     // list[3] = new sphere(vec3(-1, 0, -1), 0.5, new dielectric(1.5));
     // list[4] = new sphere(vec3(-1, 0, -1), -0.45, new dielectric(1.5));
     // hitable *world = new hitable_list(list, 5);
-    hitable *world = random_scene();
 
-    vec3 lookfrom(13,2,3);
-    vec3 lookat(0,0,0);
-    float dist_to_focus = 10;//(lookfrom-lookat).length();
-    float aperture = 0.1f;
-    camera cam(lookfrom, lookat, vec3(0,1,0), 20, float(nx)/float(ny), aperture, dist_to_focus);
+    auto world = random_scene();
+
+    vec3 lookfrom(13, 2, 3);
+    vec3 lookat(0, 0, 0);
+    vec3 vup(0, 1, 0);
+    auto dist_to_focus = 10; //(lookfrom-lookat).length();
+    auto aperture = 0.1;
+
+    camera cam(lookfrom, lookat, vup, 20, aspect_ratio, aperture, dist_to_focus);
     
-    int percent = ny / 100;
+    int percent = image_height / 100;
     
-    for (int j = ny - 1; j >= 0; j--)
+    for (int j = image_height - 1; j >= 0; --j)
     {
         if (j % percent == 0)
         {
-            int print_percent = std::abs((j - ny) / percent);
+            int print_percent = std::abs((j - image_height) / percent);
             std::cout << print_percent << "% done. \n";
         }
-        for (int i = 0; i < nx; i++)
+        for (int i = 0; i < image_width; ++i)
         {
-            vec3 col(0, 0, 0);
+            vec3 color;
+
             // Number of rays per pixel
-            for(int s = 0; s < ns; s++)
+            for(int s = 0; s < samples_per_pixel; ++s)
             {
-                float u = float(i + dis(gen)) / float(nx);
-				float v = float(j + dis(gen)) / float(ny);
+                auto u = (i + random_double()) / image_width;
+				auto v = (j + random_double()) / image_height;
 				ray r = cam.get_ray(u, v);
-                // vec3 p = r.point_at_parameter(2.0); <- don't know why this line is in the tutorial
-                col += color(r, world, 0);
+                color += ray_color(r, world, max_depth);
             }
 
-            col /= float(ns);
-
-            // Gamma correction
-            col = vec3(sqrt(col[0]), sqrt(col[1]), sqrt(col[2]));
-
-            int ir = int(255.99 * col[0]);
-            int ig = int(255.99 * col[1]);
-            int ib = int(255.99 * col[2]);
-
-            output << ir << " " << ig << " " << ib << "\n";
+            color.write_color(output, samples_per_pixel);
         }
     }
 

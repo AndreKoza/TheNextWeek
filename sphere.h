@@ -1,56 +1,57 @@
-#ifndef SPHEREH
-#define SPHEREH
+#pragma once
 
+#include "rtweekend.h"
 #include "hitable.h"
+
 
 class sphere : public hitable 
 {
     public:
         sphere() {}
-        sphere(vec3 cen, float r, material* m) 
-            :   center(cen), 
-                radius(r),
-                mat_ptr(m)
-        {
-        }
+        sphere(vec3 cen, double r, shared_ptr<material> m) 
+            :   center(cen), radius(r), mat_ptr(m) {}
 
-        virtual bool hit(const ray& r, float tmin, float tmax, hit_record& rec) const;
+        virtual bool hit(const ray& r, double tmin, double tmax, hit_record& rec) const;
 
         vec3 center;
-        float radius;
-        material* mat_ptr;
+        double radius;
+        shared_ptr<material> mat_ptr;
 };
 
 // Sphere hit function derived from sphere equation + solving a quadratic equation with known formulas...
-bool sphere::hit(const ray& r, float t_min, float t_max, hit_record& rec) const 
+bool sphere::hit(const ray& r, double t_min, double t_max, hit_record& rec) const 
 {
     vec3 oc = r.origin() - center;
-    float a = dot(r.direction(), r.direction());
-    float b = dot(oc, r.direction());
-    float c = dot(oc, oc) - radius*radius;
-    float discriminant = b*b - a*c;
+    double a = r.direction().length_squared();
+    double half_b = dot(oc, r.direction());
+    double c = oc.length_squared() - radius*radius;
+    double discriminant = half_b * half_b - a*c;
+
     if (discriminant > 0) 
     {
-        float temp = (-b - sqrt(b*b-a*c)) / a;
+        double root = sqrt(discriminant);
+
+        double temp = (-half_b - root) / a;
         if (temp < t_max && temp > t_min) 
         {
             rec.t = temp;
-            rec.p = r.point_at_parameter(rec.t);
-            rec.normal = (rec.p - center) / radius;
+            rec.p = r.at(rec.t);
+            vec3 outward_normal = (rec.p - center) / radius;
+            rec.set_face_normal(r, outward_normal);
             rec.mat_ptr = mat_ptr;
             return true;
         }
-        temp = (-b + sqrt(b*b-a*c)) / a;
+
+        temp = (-half_b + root) / a;
         if (temp < t_max && temp > t_min) 
         {
             rec.t = temp;
-            rec.p = r.point_at_parameter(rec.t);
-            rec.normal = (rec.p - center) / radius;
+            rec.p = r.at(rec.t);
+            vec3 outward_normal = (rec.p - center) / radius;
+            rec.set_face_normal(r, outward_normal);
             rec.mat_ptr = mat_ptr;
             return true;
         }
     }
     return false;
 }
-
-#endif

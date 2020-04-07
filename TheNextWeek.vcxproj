@@ -161,6 +161,7 @@
     <ClInclude Include="material.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ray.h" />
+    <ClInclude Include="rtweekend.h" />
     <ClInclude Include="sphere.h" />
     <ClInclude Include="vec3.h" />
   </ItemGroup>
