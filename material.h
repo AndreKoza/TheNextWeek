@@ -28,7 +28,7 @@ class lambertian : public material
         virtual bool scatter(const ray& r_in, const hit_record& rec, vec3& attenuation, ray& scattered) const
         {
             vec3 target = rec.p + rec.normal + random_in_unit_sphere();
-            scattered = ray(rec.p, target-rec.p);
+            scattered = ray(rec.p, target-rec.p, r_in.time());
             attenuation = albedo;
             return true;
         }
@@ -67,7 +67,7 @@ class dielectric : public material
             double etai_over_etat = rec.front_face ? (1.0 / ref_idx) : (ref_idx);
 
             vec3 unit_direction = unit_vector(r_in.direction());
-            double cos_theta = ffmin(dot(-unit_direction, rec.normal), 1.0);
+            double cos_theta = std::min(dot(-unit_direction, rec.normal), 1.0);
             double sin_theta = sqrt(1.0 - cos_theta * cos_theta);
 
             if (etai_over_etat * sin_theta > 1.0)

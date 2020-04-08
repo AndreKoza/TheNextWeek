@@ -26,19 +26,10 @@ inline double degrees_to_radians(double degrees)
 	return degrees * pi / 180.0;
 }
 
-inline double ffmin(double a, double b)
-{
-	return a <= b ? a : b;
-}
-
-inline double ffmax(double a, double b)
-{
-	return a >= b ? a : b;
-}
-
+// Returns a random real in [0,1).
 inline double random_double()
 {
-	return rand() / (RAND_MAX + 1.0);
+	return std::rand() / (RAND_MAX + 1.0);
 }
 
 inline double random_double(double min, double max)

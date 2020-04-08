@@ -6,6 +6,7 @@
 #include "hitable_list.h"
 #include "material.h"
 #include "sphere.h"
+#include "moving_sphere.h"
 
 
 vec3 ray_color(const ray& r, hitable &world, int depth)
@@ -58,7 +59,8 @@ hitable_list random_scene()
                 if (choose_mat < 0.8)
                 {
                     auto albedo = vec3::random() * vec3::random();
-                    world.add(make_shared<sphere>(center, 0.2, make_shared<lambertian>(albedo)));
+                    //world.add(make_shared<sphere>(center, 0.2, make_shared<lambertian>(albedo)));
+                    world.add(make_shared<moving_sphere>(center, center + vec3(0, random_double(0, 0.5), 0), 0.0, 1.0, 0.2, make_shared<lambertian>(albedo)));
                 }
                 // metal
                 else if (choose_mat < 0.95)
@@ -90,9 +92,9 @@ int main()
     std::ofstream output;
     output.open("picture.ppm");
 
-    const int image_width = 1200;
-    const int image_height = 800;
-    const int samples_per_pixel = 10;
+    const int image_width = 300;
+    const int image_height = 200;
+    const int samples_per_pixel = 2;
     const int max_depth = 50;
     const auto aspect_ratio = double(image_width) / double(image_height);
 
@@ -113,9 +115,9 @@ int main()
     vec3 lookat(0, 0, 0);
     vec3 vup(0, 1, 0);
     auto dist_to_focus = 10; //(lookfrom-lookat).length();
-    auto aperture = 0.1;
+    auto aperture = 0.0;
 
-    camera cam(lookfrom, lookat, vup, 20, aspect_ratio, aperture, dist_to_focus);
+    camera cam(lookfrom, lookat, vup, 20, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0);
     
     int percent = image_height / 100;
     
