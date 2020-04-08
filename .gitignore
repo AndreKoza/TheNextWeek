@@ -31,3 +31,6 @@
 *.out
 *.app
 picture.ppm
+.vs/TheNextWeek/v16/Browse.VC.db
+.vs/TheNextWeek/v16/Browse.VC.opendb
+.vs/TheNextWeek/v16/ipch/AutoPCH/d913c3f87023108b/HITABLE_LIST.ipch
