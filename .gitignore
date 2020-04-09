@@ -37,3 +37,14 @@ picture.ppm
 *.ipch
 .vs/TheNextWeek/v16/.suo
 *.db
+*.ipch
+.vs/TheNextWeek/v16/.suo
+*.db
+*.ipch
+*.iobj
+*.ipdb
+*.log
+*.pdb
+*.tlog
+*.tlog
+*.pdb
