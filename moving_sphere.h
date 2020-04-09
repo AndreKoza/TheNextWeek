@@ -12,6 +12,7 @@ class moving_sphere : public hitable
 		{}
 
 		virtual bool hit(const ray& r, double tmin, double tmax, hit_record& rec) const;
+        virtual bool bounding_box(double t0, double t1, aabb& output_box) const;
 
 		vec3 center(double time) const;
 
@@ -65,4 +66,18 @@ bool moving_sphere::hit(const ray& r, double t_min, double t_max, hit_record& re
         }
     }
     return false;
+}
+
+bool moving_sphere::bounding_box(double t0, double t1, aabb& output_box) const
+{
+    aabb box0(
+        center(t0) - vec3(radius, radius, radius),
+        center(t0) + vec3(radius, radius, radius)
+    );
+    aabb box1(
+        center(t1) - vec3(radius, radius, radius),
+        center(t1) + vec3(radius, radius, radius)
+    );
+    output_box = surrounding_box(box0, box1);
+    return true;
 }

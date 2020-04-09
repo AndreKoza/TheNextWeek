@@ -2,6 +2,7 @@
 #include <chrono>
 
 #include "rtweekend.h"
+#include "bvh.h"
 #include "camera.h"
 #include "hitable_list.h"
 #include "material.h"
@@ -13,7 +14,7 @@ vec3 ray_color(const ray& r, hitable &world, int depth)
 {
     hit_record rec;
 
-    // If we've exceeded the ray bounce limit, no more light is gahtered.
+    // If we've exceeded the ray bounce limit, no more light is gathered.
     if (depth <= 0)
         return vec3(0, 0, 0);
 
@@ -83,6 +84,7 @@ hitable_list random_scene()
     world.add(make_shared<sphere>(vec3(4, 1, 0), 1.0, make_shared<metal>(vec3(0.7, 0.6, 0.5), 0.0)));
 
     return world;
+    //return hitable_list(make_shared<bvh_node>(world, 0.0, 1.0));
 }
 
 

@@ -44,6 +44,17 @@ inline int random_int(int min, int max)
 	return static_cast<int>(random_double(min, max + 1));
 }
 
+inline double min(double a, double b)
+{ 
+	return a <= b ? a : b; 
+}
+
+inline double max(double a, double b)
+{ 
+	return a >= b ? a : b; 
+}
+
+
 
 #include "ray.h"
 #include "vec3.h"

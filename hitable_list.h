@@ -17,6 +17,7 @@ class hitable_list: public hitable
         void add(shared_ptr<hitable> object) { objects.push_back(object); }
 
         virtual bool hit(const ray& r, double t_min, double t_max, hit_record& rec) const;
+        virtual bool bounding_box(double t0, double t1, aabb& output_box) const;
         
 
         std::vector<shared_ptr<hitable>> objects;
@@ -39,4 +40,27 @@ bool hitable_list::hit(const ray& r, double t_min, double t_max, hit_record& rec
         }
     }
     return hit_anything;
+}
+
+bool hitable_list::bounding_box(double t0, double t1, aabb& output_box) const
+{
+    if (objects.empty())
+        return false;
+
+    aabb temp_box;
+    bool first_true = objects[0]->bounding_box(t0, t1, temp_box);
+
+    if (!first_true)
+        return false;
+
+    output_box = temp_box;
+
+    for (const auto& object : objects)
+    {
+        if (!object->bounding_box(t0, t1, temp_box))
+            return false;
+        output_box = surrounding_box(output_box, temp_box);
+    }
+
+    return true;
 }
