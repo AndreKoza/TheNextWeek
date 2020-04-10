@@ -27,6 +27,6 @@ class hitable
         // Only hits in the interval [t_min, t_max] are considered. t being the t from ray equation p(t) = orig + t*direction
         virtual bool hit(const ray& r, double t_min, double t_max, hit_record& rec) const = 0;
 
-        // interval t0 and t1 (the "borders" of the bb)
-        virtual bool bounding_box(double t0, double t1, aabb& output_box) const = 0;
+        // Compute bounding box of object. Object may move in interval time0 und time1, so aabb is calculated to bound all possible locations.
+        virtual bool bounding_box(double time0, double time1, aabb& output_box) const = 0;
 };

@@ -19,15 +19,17 @@ class bvh_node : public hitable
 			std::vector<shared_ptr<hitable>>& objects,
 			size_t start, size_t end, double time0, double time1);
 
-		virtual bool hit(const ray& r, double t_min, double t_max, hit_record& rec) const;
-		virtual bool bounding_box(double t0, double t1, aabb& output_box) const;
+		virtual bool hit(const ray& r, double tmin, double tmax, hit_record& rec) const;
+		virtual bool bounding_box(double time0, double time1, aabb& output_box) const;
 
 	public:
+		// Children of node are generic hitable: Can be other nodes or leaves (spheres, etc...)
 		shared_ptr<hitable> left;
 		shared_ptr<hitable> right;
 		aabb box;
 };
 
+// Returns true if min value of a's boxes is less than min value of b's boxes for given axis
 inline bool box_compare(const shared_ptr<hitable> a, const shared_ptr<hitable> b, int axis)
 {
 	aabb box_a;
@@ -54,19 +56,28 @@ bool box_z_compare(const shared_ptr<hitable> a, const shared_ptr<hitable> b)
 	return box_compare(a, b, 2);
 }
 
+// Constructs BVH: start and end arguments are needed for recursion arguments
+// Goal: Division should be done well: Two children of a node should have smaller bounding boxes
+// than their parent's bounding box (only for speed, not needed for correctness!)
 bvh_node::bvh_node(std::vector<shared_ptr<hitable>>& objects, size_t start, size_t end, double time0, double time1)
 {
+	// Randomly choose an axis and define comparator
 	int axis = random_int(0, 2);
 	auto comparator = (axis == 0) ? box_x_compare
 					: (axis == 1) ? box_y_compare
 								  : box_z_compare;
 
+	// How many objects are in objects
 	size_t object_span = end - start;
 
+	// For simplicity: If there is only one element, duplicate it in each subtree.
+	// Can be optimized but this way there are always two children
 	if (object_span == 1)
 	{
-		left = right = objects[start];
+		left  = objects[start];
+		right = objects[start];
 	}
+	// If two elements: Put one in each subtree and end recursion
 	else if (object_span == 2)
 	{
 		if (comparator(objects[start], objects[start + 1]))
@@ -80,6 +91,7 @@ bvh_node::bvh_node(std::vector<shared_ptr<hitable>>& objects, size_t start, size
 			right = objects[start];
 		}
 	}
+	// Sort the primitives and construct tree recursively
 	else
 	{
 		std::sort(objects.begin() + start, objects.begin() + end, comparator);
@@ -101,19 +113,21 @@ bvh_node::bvh_node(std::vector<shared_ptr<hitable>>& objects, size_t start, size
 	box = surrounding_box(box_left, box_right);
 }
 
-bool bvh_node::bounding_box(double t0, double t1, aabb& output_box) const
+// Just return the box which is calculated during construction.
+bool bvh_node::bounding_box(double time0, double time1, aabb& output_box) const
 {
 	output_box = box;
 	return true;
 }
 
-bool bvh_node::hit(const ray& r, double t_min, double t_max, hit_record& rec) const
+// Check whether the box for the node is hit, and if so, check the children and sort out any details
+bool bvh_node::hit(const ray& r, double tmin, double tmax, hit_record& rec) const
 {
-	if (!box.hit(r, t_min, t_max))
+	if (!box.hit(r, tmin, tmax))
 		return false;
 
-	bool hit_left = left->hit(r, t_min, t_max, rec);
-	bool hit_right = right->hit(r, t_min, hit_left ? rec.t : t_max, rec);
+	bool hit_left = left->hit(r, tmin, tmax, rec);
+	bool hit_right = right->hit(r, tmin, hit_left ? rec.t : tmax, rec);
 
 	return hit_left || hit_right;
 }

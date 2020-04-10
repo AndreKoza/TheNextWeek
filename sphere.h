@@ -12,7 +12,7 @@ class sphere : public hitable
             :   center(cen), radius(r), mat_ptr(m) {}
 
         virtual bool hit(const ray& r, double tmin, double tmax, hit_record& rec) const;
-        virtual bool bounding_box(double t0, double t1, aabb& output_box) const;
+        virtual bool bounding_box(double time0, double time01, aabb& output_box) const;
 
         vec3 center;
         double radius;
@@ -57,7 +57,8 @@ bool sphere::hit(const ray& r, double t_min, double t_max, hit_record& rec) cons
     return false;
 }
 
-bool sphere::bounding_box(double t0, double t1, aabb& output_box) const
+// This sphere does not move over time, so time variables can be ignored
+bool sphere::bounding_box(double time0, double time1, aabb& output_box) const
 {
     output_box = aabb(
         center - vec3(radius, radius, radius),

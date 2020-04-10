@@ -83,8 +83,8 @@ hitable_list random_scene()
     world.add(make_shared<sphere>(vec3(-4, 1, 0), 1.0, make_shared<lambertian>(vec3(0.1, 0.2, 0.5))));
     world.add(make_shared<sphere>(vec3(4, 1, 0), 1.0, make_shared<metal>(vec3(0.7, 0.6, 0.5), 0.0)));
 
-    return world;
-    //return hitable_list(make_shared<bvh_node>(world, 0.0, 1.0));
+    //return world;
+    return hitable_list(make_shared<bvh_node>(world, 0.0, 1.0));
 }
 
 
