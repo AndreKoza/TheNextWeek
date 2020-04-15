@@ -22,5 +22,5 @@ class ray
 
         vec3 orig;
         vec3 dir;
-        double tm;
+        double tm; // time the ray exists at
 };

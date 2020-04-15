@@ -33,6 +33,7 @@ class camera
         {
             vec3 rd = lens_radius * random_in_unit_disc();
             vec3 offset = u * rd.x() + v * rd.y();
+            // Randomly determine the ray between shutter open / close times
             return ray(
                 origin + offset, 
                 lower_left_corner + s*horizontal + t*vertical - origin - offset,

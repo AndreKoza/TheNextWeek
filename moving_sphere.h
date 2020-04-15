@@ -18,14 +18,15 @@ class moving_sphere : public hitable
 
 
 	public:
-		vec3 center0;
-		vec3 center1;
+		vec3 center0; // center at time0
+		vec3 center1; // center at time1
 		double time0;
 		double time1;
 		double radius;
 		shared_ptr<material> mat_ptr;
 };
 
+// Center moves linearly from center0 at time0 to center1 at time1
 vec3 moving_sphere::center(double time) const
 {
 	return center0 + ((time - time0) / (time1 - time0)) * (center1 - center0);
