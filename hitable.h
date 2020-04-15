@@ -8,11 +8,13 @@ class material;
 
 struct hit_record
 {
-    vec3 p; 
-    vec3 normal;
-    shared_ptr<material> mat_ptr;
+    vec3 p; // hit point
+    vec3 normal; // hit point normal
+    shared_ptr<material> mat_ptr; // stored material pointer
     double t; // the t from the ray equation
-    bool front_face;
+    double u; // u texture coordinate
+    double v; // v texture coordinate
+    bool front_face; // front face or back face?
 
     inline void set_face_normal(const ray& r, const vec3& outward_normal)
     {
