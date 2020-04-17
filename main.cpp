@@ -112,6 +112,17 @@ hitable_list two_spheres()
     return objects;
 }
 
+hitable_list two_perlin_spheres()
+{
+    hitable_list objects;
+
+    auto pertext = make_shared<noise_texture>();
+    objects.add(make_shared<sphere>(vec3(0, -1000, 0), 1000, make_shared<lambertian>(pertext)));
+    objects.add(make_shared<sphere>(vec3(0, 2, 0), 2, make_shared<lambertian>(pertext)));
+
+    return objects;
+}
+
 
 int main()
 {
@@ -136,7 +147,7 @@ int main()
     // list[4] = new sphere(vec3(-1, 0, -1), -0.45, new dielectric(1.5));
     // hitable *world = new hitable_list(list, 5);
 
-    auto world = two_spheres();
+    auto world = two_perlin_spheres();
 
     vec3 lookfrom(13, 2, 3);
     vec3 lookat(0, 0, 0);

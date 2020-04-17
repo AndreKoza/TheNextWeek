@@ -1,11 +1,26 @@
 #pragma once
 
 #include "rtweekend.h"
+#include "perlin.h"
 
 class texture
 {
 	public:
 		virtual vec3 value(double u, double v, const vec3& p) const = 0;
+};
+
+class noise_texture : public texture
+{
+	public:
+		noise_texture() {}
+
+		virtual vec3 value(double u, double v, const vec3& p) const
+		{
+			return vec3(1, 1, 1) * noise.noise(p);
+		}
+
+	private:
+		perlin noise;
 };
 
 class constant_texture : public texture
