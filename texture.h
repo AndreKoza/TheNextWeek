@@ -17,12 +17,17 @@ class noise_texture : public texture
 
 		virtual vec3 value(double u, double v, const vec3& p) const
 		{
-			return vec3(1, 1, 1) * noise.noise(scale * p);
+			/*
+			The output of the perlin interpretation can return negative values. 
+			These negative values will be passed to the sqrt() function of our gamma 
+			function and get turned into NaNs. We will cast the perlin output back to between 0 and 1. 
+			*/
+			return vec3(1, 1, 1) * 0.5 * (1.0 + noise.noise(scale * p));
 		}
 
 	private:
 		perlin noise;
-		double scale;
+		double scale; // acts as noise frequency / multiplicator
 };
 
 class constant_texture : public texture
