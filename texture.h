@@ -20,9 +20,13 @@ class noise_texture : public texture
 			/*
 			The output of the perlin interpretation can return negative values. 
 			These negative values will be passed to the sqrt() function of our gamma 
-			function and get turned into NaNs. We will cast the perlin output back to between 0 and 1. 
+			function and get turned into NaNs. We will cast the perlin output back to between 0 and 1.
+
+			Regarding sine: The basic idea is to make color proportional to something like a sine function, 
+			and use turbulence to adjust the phase (so it shifts x in sin(x)) which makes the stripes undulate.
+			Commenting out straight noise and turbulence, and giving a marble-like effect is:
 			*/
-			return vec3(1, 1, 1) * 0.5 * (1.0 + noise.noise(scale * p));
+			return vec3(1, 1, 1) * 0.5 * (1.0 + sin(scale*p.z() + 10*noise.turb(p)));
 		}
 
 	private:
