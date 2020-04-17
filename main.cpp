@@ -58,20 +58,29 @@ hitable_list random_scene()
     world.add(make_shared<sphere>(vec3(0, -1000, 0), 1000, make_shared<lambertian>(checker)));
 
     int i = 1;
-    for (int a = -11; a < 11; a++)
+    for (int a = -12; a < 12; a++)
     {
-        for (int b = -11; b < 11; b++)
+        for (int b = -12; b < 12; b++)
         {
             double choose_mat = random_double();
             vec3 center(a + 0.9f * random_double(), 0.2f, b + 0.9f * random_double());
             if ((center - vec3(4, 0.2, 0)).length() > 0.9)
             {
+                // perlin marble
+                if (choose_mat < 0.3)
+                {
+                    auto pertext = make_shared<noise_texture>(4);
+                    world.add(make_shared<sphere>(center, 0.2, make_shared<lambertian>(pertext)));
+                }
                 // diffuse
                 if (choose_mat < 0.8)
                 {
                     auto albedo = vec3::random() * vec3::random();
-                    //world.add(make_shared<sphere>(center, 0.2, make_shared<lambertian>(make_shared<constant_texture>(albedo))));
-                    world.add(make_shared<moving_sphere>(center, center + vec3(0, random_double(0, 0.5), 0), 0.0, 1.0, 0.2, make_shared<lambertian>(make_shared<constant_texture>(albedo))));
+                    auto rnd = random_double();
+                    if (rnd < 0.5)
+                        world.add(make_shared<sphere>(center, 0.2, make_shared<lambertian>(make_shared<constant_texture>(albedo))));
+                    else
+                        world.add(make_shared<moving_sphere>(center, center + vec3(0, random_double(0, 0.5), 0), 0.0, 1.0, 0.2, make_shared<lambertian>(make_shared<constant_texture>(albedo))));
                 }
                 // metal
                 else if (choose_mat < 0.95)
@@ -88,10 +97,12 @@ hitable_list random_scene()
             }
         }
     }
+    auto pertext = make_shared<noise_texture>(4);
 
     world.add(make_shared<sphere>(vec3(0, 1, 0), 1.0, make_shared<dielectric>(1.5)));
-    world.add(make_shared<sphere>(vec3(-4, 1, 0), 1.0, make_shared<lambertian>(make_shared<constant_texture>(vec3(0.1, 0.2, 0.5)))));
-    world.add(make_shared<sphere>(vec3(4, 1, 0), 1.0, make_shared<metal>(vec3(0.7, 0.6, 0.5), 0.0)));
+    world.add(make_shared<sphere>(vec3(0, 1, 2), 1.0, make_shared<lambertian>(pertext)));
+    world.add(make_shared<sphere>(vec3(0, 1, -2), 1.0, make_shared<metal>(vec3(0.7, 0.6, 0.5), 0.0)));
+    world.add(make_shared<sphere>(vec3(0, 1, -4), 1.0, make_shared<lambertian>(make_shared<constant_texture>(vec3(0.1, 0.2, 0.5)))));
 
     //return world;
     return hitable_list(make_shared<bvh_node>(world, 0.0, 1.0));
@@ -132,7 +143,7 @@ int main()
 
     const int image_width = 600;
     const int image_height = 300;
-    const int samples_per_pixel = 25;
+    const int samples_per_pixel = 10;
     const int max_depth = 50;
     const auto aspect_ratio = double(image_width) / double(image_height);
 
@@ -147,7 +158,7 @@ int main()
     // list[4] = new sphere(vec3(-1, 0, -1), -0.45, new dielectric(1.5));
     // hitable *world = new hitable_list(list, 5);
 
-    auto world = two_perlin_spheres();
+    auto world = random_scene();
 
     vec3 lookfrom(13, 2, 3);
     vec3 lookat(0, 0, 0);
