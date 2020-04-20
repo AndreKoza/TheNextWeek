@@ -8,6 +8,7 @@
 #include "material.h"
 #include "sphere.h"
 #include "moving_sphere.h"
+#include "rtw_stb_image.h"
 
 
 vec3 ray_color(const ray& r, hitable &world, int depth)
@@ -63,7 +64,7 @@ hitable_list random_scene()
         for (int b = -12; b < 12; b++)
         {
             double choose_mat = random_double();
-            vec3 center(a + 0.9f * random_double(), 0.2f, b + 0.9f * random_double());
+            vec3 center(a + 0.9f * random_double(), 0.2, b + 0.9f * random_double());
             if ((center - vec3(4, 0.2, 0)).length() > 0.9)
             {
                 // perlin marble
@@ -97,12 +98,24 @@ hitable_list random_scene()
             }
         }
     }
+
+    int nx;
+    int ny;
+    int nn;
+    unsigned char* texture_data = stbi_load("earthmap.jpg", &nx, &ny, &nn, 0);
+
+    auto earth_surface =
+        make_shared<lambertian>(make_shared<image_texture>(texture_data, nx, ny));
+    world.add(make_shared<sphere>(vec3(3, 0.5, -1), 0.5, earth_surface));
+
     auto pertext = make_shared<noise_texture>(4);
+    world.add(make_shared<sphere>(vec3(0, 1, 2), 1.0, make_shared<lambertian>(pertext)));
 
     world.add(make_shared<sphere>(vec3(0, 1, 0), 1.0, make_shared<dielectric>(1.5)));
-    world.add(make_shared<sphere>(vec3(0, 1, 2), 1.0, make_shared<lambertian>(pertext)));
+    
     world.add(make_shared<sphere>(vec3(0, 1, -2), 1.0, make_shared<metal>(vec3(0.7, 0.6, 0.5), 0.0)));
     world.add(make_shared<sphere>(vec3(0, 1, -4), 1.0, make_shared<lambertian>(make_shared<constant_texture>(vec3(0.1, 0.2, 0.5)))));
+
 
     //return world;
     return hitable_list(make_shared<bvh_node>(world, 0.0, 1.0));
@@ -134,6 +147,19 @@ hitable_list two_perlin_spheres()
     return objects;
 }
 
+hitable_list earth()
+{
+    int nx;
+    int ny;
+    int nn;
+    unsigned char* texture_data = stbi_load("earthmap.jpg", &nx, &ny, &nn, 0);
+
+    auto earth_surface =
+        make_shared<lambertian>(make_shared<image_texture>(texture_data, nx, ny));
+    auto globe = make_shared<sphere>(vec3(0, 0, 0), 2, earth_surface);
+
+    return hitable_list(globe);
+}
 
 int main()
 {
@@ -182,11 +208,11 @@ int main()
             vec3 color;
 
             // Number of rays per pixel
-            for(int s = 0; s < samples_per_pixel; ++s)
+            for (int s = 0; s < samples_per_pixel; ++s)
             {
                 auto u = (i + random_double()) / image_width;
-				auto v = (j + random_double()) / image_height;
-				ray r = cam.get_ray(u, v);
+                auto v = (j + random_double()) / image_height;
+                ray r = cam.get_ray(u, v);
                 color += ray_color(r, world, max_depth);
             }
 

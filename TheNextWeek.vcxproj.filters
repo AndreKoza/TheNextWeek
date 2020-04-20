@@ -16,6 +16,9 @@
     <Filter Include="common">
       <UniqueIdentifier>{1b41e817-39e5-46a9-9fb4-cb747aa1f7ec}</UniqueIdentifier>
     </Filter>
+    <Filter Include="external">
+      <UniqueIdentifier>{b6174f97-689e-4f03-b2de-faa4fb5b6522}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="hitable.h">
@@ -56,6 +59,15 @@
     </ClInclude>
     <ClInclude Include="perlin.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image.h">
+      <Filter>external</Filter>
+    </ClInclude>
+    <ClInclude Include="std_image_write.h">
+      <Filter>external</Filter>
+    </ClInclude>
+    <ClInclude Include="rtw_stb_image.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

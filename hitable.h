@@ -6,6 +6,22 @@
 
 class material;
 
+/* utility function to calculate uv coordinates for a sphere
+   Expects things on the unit sphere (divided by radius) centered at the origin (minus center)
+   Spherical coordinates phi and theta can be calculated by spherical equations (see tutorial for derivations)
+*/
+void get_sphere_uv(const vec3& p, double& u, double& v)
+{
+    auto phi = atan2(p.z(), p.x());
+    auto theta = asin(p.y());
+
+    // atan2 returns in the range -pi to pi but we want it in the range [0,1]
+    u = 1 - (phi + pi) / (2 * pi);
+
+    // asin returns in the range -pi/2 to pi/2 but we want it in the range [0,1]
+    v = (theta + pi / 2) / pi;
+}
+
 struct hit_record
 {
     vec3 p; // hit point
