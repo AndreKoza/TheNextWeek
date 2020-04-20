@@ -1,5 +1,6 @@
 #include <fstream>
 #include <chrono>
+#include <ppl.h>
 
 #include "rtweekend.h"
 #include "bvh.h"
@@ -167,9 +168,9 @@ int main()
     std::ofstream output;
     output.open("picture.ppm");
 
-    const int image_width = 600;
-    const int image_height = 300;
-    const int samples_per_pixel = 10;
+    const int image_width = 1200;
+    const int image_height = 600;
+    const int samples_per_pixel = 50;
     const int max_depth = 50;
     const auto aspect_ratio = double(image_width) / double(image_height);
 
@@ -208,13 +209,14 @@ int main()
             vec3 color;
 
             // Number of rays per pixel
-            for (int s = 0; s < samples_per_pixel; ++s)
+            concurrency::parallel_for(int(0), samples_per_pixel, [&](int s)
+            //for (int s = 0; s < samples_per_pixel; ++s)
             {
                 auto u = (i + random_double()) / image_width;
                 auto v = (j + random_double()) / image_height;
                 ray r = cam.get_ray(u, v);
                 color += ray_color(r, world, max_depth);
-            }
+            }); 
 
             color.write_color(output, samples_per_pixel);
         }
