@@ -8,39 +8,39 @@
 #include "hitable_list.h"
 #include "material.h"
 #include "sphere.h"
+#include "aarect.h"
 #include "moving_sphere.h"
 #include "rtw_stb_image.h"
 
 
-vec3 ray_color(const ray& r, hitable &world, int depth)
+vec3 ray_color(const ray& r, const vec3& background, const hitable &world, int depth)
 {
     hit_record rec;
 
     // If we've exceeded the ray bounce limit, no more light is gathered.
     if (depth <= 0)
-        return vec3(0, 0, 0);
+        return Color::black;
 
-    // use 0.001 instead of 0 to avoid shadow acne (in this case leads to exception (don't know why))
-    if (world.hit(r, 0.001, infinity, rec))
-    {
-        ray scattered;
-        vec3 attenuation;
-        if (rec.mat_ptr->scatter(r, rec, attenuation, scattered))
-        {
-            return attenuation * ray_color(scattered, world, depth-1);
-        }
-        else
-        {
-            return vec3(0,0,0);
-        }
-    }
-    else
-    {
-        vec3 unit_direction = unit_vector(r.direction());
-        double t = 0.5 * (unit_direction.y() + 1.0);
-        // Linear interpolate between white and some other color
-        return (1.0-t)*vec3(1.0, 1.0, 1.0) + t*vec3(0.5, 0.7, 1.0);
-    }
+    // use 0.001 (epsilon) instead of 0 to avoid shadow acne (in this case leads to exception (don't know why))
+    if (!world.hit(r, epsilon, infinity, rec))
+        return background;
+
+    ray scattered;
+    vec3 attenuation;
+    vec3 emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
+
+    if (!rec.mat_ptr->scatter(r, rec, attenuation, scattered))
+        return emitted;
+
+    return emitted + attenuation * ray_color(scattered, background, world, depth - 1);
+
+    //else
+    //{
+    //    vec3 unit_direction = unit_vector(r.direction());
+    //    double t = 0.5 * (unit_direction.y() + 1.0);
+    //    // Linear interpolate between white and some other color
+    //    return (1.0-t)*vec3(1.0, 1.0, 1.0) + t*vec3(0.5, 0.7, 1.0);
+    //}
 }
 
 
@@ -162,19 +162,53 @@ hitable_list earth()
     return hitable_list(globe);
 }
 
+hitable_list simple_light()
+{
+    hitable_list objects;
+
+    auto pertext = make_shared<noise_texture>(4);
+    objects.add(make_shared<sphere>(vec3(0, -1000, 0), 1000, make_shared<lambertian>(pertext)));
+    objects.add(make_shared<sphere>(vec3(0, 2, 0), 2, make_shared<lambertian>(pertext)));
+
+    auto difflight = make_shared<diffuse_light>(make_shared<constant_texture>(vec3(4, 4, 4)));
+    objects.add(make_shared<sphere>(vec3(0, 7, 0), 2, difflight));
+    objects.add(make_shared<xy_rect>(3, 5, 1, 3, -2, difflight));
+
+    return objects;
+}
+
+hitable_list cornell_box()
+{
+    hitable_list objects;
+
+    auto red = make_shared<lambertian>(make_shared<constant_texture>(vec3(0.65, 0.05, 0.05)));
+    auto white = make_shared<lambertian>(make_shared<constant_texture>(vec3(0.73, 0.73, 0.73)));
+    auto green = make_shared<lambertian>(make_shared<constant_texture>(vec3(0.12, 0.45, 0.15)));
+    auto light = make_shared<diffuse_light>(make_shared<constant_texture>(vec3(15, 15, 15)));
+
+    objects.add(make_shared<flip_face>(make_shared<yz_rect>(0, 555, 0, 555, 555, green)));
+    objects.add(make_shared<yz_rect>(0, 555, 0, 555, 0, red));
+    objects.add(make_shared<xz_rect>(213, 343, 227, 332, 554, light));
+    objects.add(make_shared<flip_face>(make_shared<xz_rect>(0, 555, 0, 555, 555, white)));
+    objects.add(make_shared<xy_rect>(0, 555, 0, 555, 555, white));
+    objects.add(make_shared<flip_face>(make_shared<xy_rect>(0, 555, 0, 555, 555, white)));
+
+    return objects;
+}
+
 int main()
 {
     auto start = std::chrono::system_clock::now();
     std::ofstream output;
     output.open("picture.ppm");
 
-    const int image_width = 1200;
+    const int image_width = 600;
     const int image_height = 600;
-    const int samples_per_pixel = 50;
-    const int max_depth = 50;
-    const auto aspect_ratio = double(image_width) / double(image_height);
+    const int samples_per_pixel = 2000;
+    const int max_depth = 200;
 
-    output << "P3\n" << image_width << " " << image_height << "\n255\n";
+    const auto aspect_ratio = double(image_width) / double(image_height);  
+
 
 
     // hitable *list[5];
@@ -185,15 +219,72 @@ int main()
     // list[4] = new sphere(vec3(-1, 0, -1), -0.45, new dielectric(1.5));
     // hitable *world = new hitable_list(list, 5);
 
-    auto world = random_scene();
+    
 
     vec3 lookfrom(13, 2, 3);
     vec3 lookat(0, 0, 0);
     vec3 vup(0, 1, 0);
     auto dist_to_focus = 10; //(lookfrom-lookat).length();
     auto aperture = 0.0;
+    auto vfov = 20.0;
+    vec3 background(Color::black);
+    auto world = random_scene();
 
-    camera cam(lookfrom, lookat, vup, 20, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0);
+    switch (6)
+    {
+    case 1:
+        world = random_scene();
+        lookfrom = vec3(13, 2, 3);
+        lookat = vec3(0, 0, 0);
+        vfov = 20.0;
+        background = vec3(0.7, 0.8, 1.0);
+        break;
+
+    case 2:
+        world = two_spheres();
+        lookfrom = vec3(13, 2, 3);
+        lookat = vec3(0, 0, 0);
+        vfov = 20.0;
+        background = vec3(0.70, 0.80, 1.00);
+        break;
+
+    case 3:
+        world = two_perlin_spheres();
+        lookfrom = vec3(13, 2, 3);
+        lookat = vec3(0, 0, 0);
+        vfov = 20.0;
+        background = vec3(0.70, 0.80, 1.00);
+        break;
+
+    case 4:
+        world = earth();
+        lookfrom = vec3(0, 0, 12);
+        lookat = vec3(0, 0, 0);
+        vfov = 20.0;
+        background = vec3(0.70, 0.80, 1.00);
+        break;
+
+    case 5:
+        world = simple_light();
+        lookfrom = vec3(26, 3, 6);
+        lookat = vec3(0, 2, 0);
+        vfov = 20.0;
+        break;
+
+    default:
+    case 6:
+        world = cornell_box();
+        lookfrom = vec3(278, 278, -800);
+        lookat = vec3(278, 278, 0);
+        vfov = 40.0;
+        break;
+    }
+
+
+
+    output << "P3\n" << image_width << " " << image_height << "\n255\n";
+
+    camera cam(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0);
     
     int percent = image_height / 100;
     
@@ -215,7 +306,7 @@ int main()
                 auto u = (i + random_double()) / image_width;
                 auto v = (j + random_double()) / image_height;
                 ray r = cam.get_ray(u, v);
-                color += ray_color(r, world, max_depth);
+                color += ray_color(r, background, world, max_depth);
             }); 
 
             color.write_color(output, samples_per_pixel);

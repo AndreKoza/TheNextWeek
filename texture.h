@@ -95,7 +95,7 @@ class image_texture : public texture
 			}
 
 			auto i = static_cast<int>(u * nx);
-			auto j = static_cast<int>((1 - v) * ny - 0.001);
+			auto j = static_cast<int>((1 - v) * ny - epsilon);
 
 			i = std::clamp(i, 0, nx - 1);
 			j = std::clamp(j, 0, ny - 1);

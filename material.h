@@ -17,6 +17,11 @@ double schlick(double cosine, double ref_idx)
 class material
 {
     public:
+        virtual vec3 emitted(double u, double v, const vec3& p) const
+        {
+            return Color::black;
+        }
+
         virtual bool scatter(const ray& r_in, const hit_record& rec, vec3& attenuation, ray& scattered) const = 0;
 };
 
@@ -94,4 +99,24 @@ class dielectric : public material
         }
 
         double ref_idx;
+};
+
+class diffuse_light : public material
+{
+    public:
+        diffuse_light(shared_ptr<texture> a) : emit(a) {}
+
+        virtual bool scatter(const ray& r_in, const hit_record& rec, vec3& attenuation, ray& scattered) const
+        {
+            return false;
+        }
+
+        virtual vec3 emitted(double u, double v, const vec3& p) const
+        {
+            return emit->value(u, v, p);
+        }
+
+
+    private:
+        shared_ptr<texture> emit;
 };

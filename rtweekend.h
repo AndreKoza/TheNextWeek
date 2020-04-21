@@ -17,6 +17,7 @@ using std::make_shared;
 
 const double infinity = std::numeric_limits<double>::infinity();
 const double pi = 3.1415926535897932385;
+const double epsilon = 0.001;
 
 
 // Utility Functions
@@ -58,3 +59,11 @@ inline double max(double a, double b)
 
 #include "ray.h"
 #include "vec3.h"
+
+
+// Colors
+
+namespace Color
+{
+	const vec3 black = vec3(0, 0, 0);
+}
