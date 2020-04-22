@@ -11,6 +11,7 @@
 #include "aarect.h"
 #include "moving_sphere.h"
 #include "rtw_stb_image.h"
+#include "box.h"
 
 
 vec3 ray_color(const ray& r, const vec3& background, const hitable &world, int depth)
@@ -188,11 +189,21 @@ hitable_list cornell_box()
 
     objects.add(make_shared<flip_face>(make_shared<yz_rect>(0, 555, 0, 555, 555, green)));
     objects.add(make_shared<yz_rect>(0, 555, 0, 555, 0, red));
-    objects.add(make_shared<xz_rect>(213, 343, 227, 332, 554, light));
+    objects.add(make_shared<xz_rect>(120, 420, 120, 420, 554, light)); // 213, 343, 227, 332, 554
     objects.add(make_shared<flip_face>(make_shared<xz_rect>(0, 555, 0, 555, 555, white)));
     objects.add(make_shared<xy_rect>(0, 555, 0, 555, 555, white));
     objects.add(make_shared<flip_face>(make_shared<xy_rect>(0, 555, 0, 555, 555, white)));
 
+    shared_ptr<hitable> box1 = make_shared<box>(vec3(0, 0, 0), vec3(165, 330, 165), white);
+    box1 = make_shared<rotate_y>(box1, 15);
+    box1 = make_shared<translate>(box1, vec3(265, 0, 295));
+    objects.add(box1);
+
+    shared_ptr<hitable> box2 = make_shared<box>(vec3(0, 0, 0), vec3(165, 165, 165), white);
+    box2 = make_shared<rotate_y>(box2, -18);
+    box2 = make_shared<translate>(box2, vec3(130, 0, 65));
+    objects.add(box2);
+    
     return objects;
 }
 
@@ -204,8 +215,8 @@ int main()
 
     const int image_width = 600;
     const int image_height = 600;
-    const int samples_per_pixel = 2000;
-    const int max_depth = 200;
+    const int samples_per_pixel = 100;
+    const int max_depth = 50;
 
     const auto aspect_ratio = double(image_width) / double(image_height);  
 

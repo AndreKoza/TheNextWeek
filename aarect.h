@@ -13,9 +13,9 @@ class xy_rect : public hitable
 			: x0(_x0), x1(_x1), y0(_y0), y1(_y1), k(_k), mat_ptr(mat)
 		{}
 
-		virtual bool hit(const ray& r, double t0, double t1, hit_record& rec) const;
+		virtual bool hit(const ray& r, double t_min, double t_max, hit_record& rec) const;
 
-		virtual bool bounding_box(double t0, double t1, aabb& output_box) const
+		virtual bool bounding_box(double time0, double time1, aabb& output_box) const
 		{
 			output_box = aabb(vec3(x0, y0, k - 0.0001), vec3(x1, y1, k + 0001));
 			return true;
@@ -41,9 +41,9 @@ public:
 		: x0(_x0), x1(_x1), z0(_z0), z1(_z1), k(_k), mat_ptr(mat)
 	{}
 
-	virtual bool hit(const ray& r, double t0, double t1, hit_record& rec) const;
+	virtual bool hit(const ray& r, double t_min, double t_max, hit_record& rec) const;
 
-	virtual bool bounding_box(double t0, double t1, aabb& output_box) const
+	virtual bool bounding_box(double time0, double time1, aabb& output_box) const
 	{
 		output_box = aabb(vec3(x0, k - 0.0001, z0), vec3(x1, k + 0001, z1));
 		return true;
@@ -69,9 +69,9 @@ public:
 		: y0(_y0), y1(_y1), z0(_z0), z1(_z1), k(_k), mat_ptr(mat)
 	{}
 
-	virtual bool hit(const ray& r, double t0, double t1, hit_record& rec) const;
+	virtual bool hit(const ray& r, double t_min, double t_max, hit_record& rec) const;
 
-	virtual bool bounding_box(double t0, double t1, aabb& output_box) const
+	virtual bool bounding_box(double time0, double time1, aabb& output_box) const
 	{
 		output_box = aabb(vec3(k - 0.0001, y0, z0), vec3(k + 0001, y1, z1));
 		return true;
@@ -88,13 +88,13 @@ private:
 };
 
 
-bool xy_rect::hit(const ray& r, double t0, double t1, hit_record& rec) const
+bool xy_rect::hit(const ray& r, double t_min, double t_max, hit_record& rec) const
 {
 	// Determine ray / rectangle hitpoint z(t) = a_z + t * b_z with z = k => t = (k - a) / b
 	auto t = (k - r.origin().z()) / r.direction().z();
 	
 	// Is t inside rect?
-	if (t < t0 || t > t1)
+	if (t < t_min || t > t_max)
 		return false;
 
 	// Solve for x / y by plugging in t in equations x resp. y = a + t * b
@@ -114,13 +114,13 @@ bool xy_rect::hit(const ray& r, double t0, double t1, hit_record& rec) const
 	return true;
 }
 
-bool xz_rect::hit(const ray& r, double t0, double t1, hit_record& rec) const
+bool xz_rect::hit(const ray& r, double t_min, double t_max, hit_record& rec) const
 {
 	// Determine ray / rectangle hitpoint z(t) = a_z + t * b_z with z = k => t = (k - a) / b
 	auto t = (k - r.origin().y()) / r.direction().y();
 
 	// Is t inside rect?
-	if (t < t0 || t > t1)
+	if (t < t_min || t > t_max)
 		return false;
 
 	// Solve for x / y by plugging in t in equations x resp. y = a + t * b
@@ -140,13 +140,13 @@ bool xz_rect::hit(const ray& r, double t0, double t1, hit_record& rec) const
 	return true;
 }
 
-bool yz_rect::hit(const ray& r, double t0, double t1, hit_record& rec) const
+bool yz_rect::hit(const ray& r, double t_min, double t_max, hit_record& rec) const
 {
 	// Determine ray / rectangle hitpoint z(t) = a_z + t * b_z with z = k => t = (k - a) / b
 	auto t = (k - r.origin().x()) / r.direction().x();
 
 	// Is t inside rect?
-	if (t < t0 || t > t1)
+	if (t < t_min || t > t_max)
 		return false;
 
 	// Solve for x / y by plugging in t in equations x resp. y = a + t * b
