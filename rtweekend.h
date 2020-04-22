@@ -55,7 +55,11 @@ inline double max(double a, double b)
 	return a >= b ? a : b; 
 }
 
-
+inline double clamp(double x, double min, double max) {
+	if (x < min) return min;
+	if (x > max) return max;
+	return x;
+}
 
 #include "ray.h"
 #include "vec3.h"

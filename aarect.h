@@ -17,7 +17,7 @@ class xy_rect : public hitable
 
 		virtual bool bounding_box(double time0, double time1, aabb& output_box) const
 		{
-			output_box = aabb(vec3(x0, y0, k - 0.0001), vec3(x1, y1, k + 0001));
+			output_box = aabb(vec3(x0, y0, k - 0.0001), vec3(x1, y1, k + 0.0001));
 			return true;
 		}
 
@@ -45,7 +45,7 @@ public:
 
 	virtual bool bounding_box(double time0, double time1, aabb& output_box) const
 	{
-		output_box = aabb(vec3(x0, k - 0.0001, z0), vec3(x1, k + 0001, z1));
+		output_box = aabb(vec3(x0, k - 0.0001, z0), vec3(x1, k + 0.0001, z1));
 		return true;
 	}
 
@@ -73,7 +73,7 @@ public:
 
 	virtual bool bounding_box(double time0, double time1, aabb& output_box) const
 	{
-		output_box = aabb(vec3(k - 0.0001, y0, z0), vec3(k + 0001, y1, z1));
+		output_box = aabb(vec3(k - 0.0001, y0, z0), vec3(k + 0.0001, y1, z1));
 		return true;
 	}
 
@@ -133,7 +133,7 @@ bool xz_rect::hit(const ray& r, double t_min, double t_max, hit_record& rec) con
 	rec.u = (x - x0) / (x1 - x0);
 	rec.v = (z - z0) / (z1 - z0);
 	rec.t = t;
-	vec3 outward_normal = vec3(0, 0, 1);
+	vec3 outward_normal = vec3(0, 1, 0);
 	rec.set_face_normal(r, outward_normal);
 	rec.mat_ptr = mat_ptr;
 	rec.p = r.at(t);
@@ -159,7 +159,7 @@ bool yz_rect::hit(const ray& r, double t_min, double t_max, hit_record& rec) con
 	rec.u = (y - y0) / (y1 - y0);
 	rec.v = (z - z0) / (z1 - z0);
 	rec.t = t;
-	vec3 outward_normal = vec3(0, 0, 1);
+	vec3 outward_normal = vec3(1, 0, 0);
 	rec.set_face_normal(r, outward_normal);
 	rec.mat_ptr = mat_ptr;
 	rec.p = r.at(t);

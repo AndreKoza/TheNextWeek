@@ -187,12 +187,12 @@ hitable_list cornell_box()
     auto green = make_shared<lambertian>(make_shared<constant_texture>(vec3(0.12, 0.45, 0.15)));
     auto light = make_shared<diffuse_light>(make_shared<constant_texture>(vec3(15, 15, 15)));
 
-    objects.add(make_shared<flip_face>(make_shared<yz_rect>(0, 555, 0, 555, 555, green)));
-    objects.add(make_shared<yz_rect>(0, 555, 0, 555, 0, red));
-    objects.add(make_shared<xz_rect>(120, 420, 120, 420, 554, light)); // 213, 343, 227, 332, 554
-    objects.add(make_shared<flip_face>(make_shared<xz_rect>(0, 555, 0, 555, 555, white)));
-    objects.add(make_shared<xy_rect>(0, 555, 0, 555, 555, white));
-    objects.add(make_shared<flip_face>(make_shared<xy_rect>(0, 555, 0, 555, 555, white)));
+    objects.add(make_shared<flip_face>(make_shared<yz_rect>(0, 555, 0, 555, 555, green))); // left
+    objects.add(make_shared<yz_rect>(0, 555, 0, 555, 0, red)); // right
+    objects.add(make_shared<xz_rect>(213, 343, 227, 332, 554, light)); // 213, 343, 227, 332, 554  // 120, 420, 120, 420, 554
+    objects.add(make_shared<flip_face>(make_shared<xz_rect>(0, 555, 0, 555, 555, white))); // top
+    objects.add(make_shared<xz_rect>(0, 555, 0, 555, 0, white)); // bottom
+    objects.add(make_shared<flip_face>(make_shared<xy_rect>(0, 555, 0, 555, 555, white))); // back
 
     shared_ptr<hitable> box1 = make_shared<box>(vec3(0, 0, 0), vec3(165, 330, 165), white);
     box1 = make_shared<rotate_y>(box1, 15);
@@ -203,6 +203,8 @@ hitable_list cornell_box()
     box2 = make_shared<rotate_y>(box2, -18);
     box2 = make_shared<translate>(box2, vec3(130, 0, 65));
     objects.add(box2);
+
+    //objects.add(make_shared<sphere>(vec3(130, 50, 65), 50.0, make_shared<dielectric>(1.5)));
     
     return objects;
 }
@@ -215,7 +217,7 @@ int main()
 
     const int image_width = 600;
     const int image_height = 600;
-    const int samples_per_pixel = 100;
+    const int samples_per_pixel = 1000;
     const int max_depth = 50;
 
     const auto aspect_ratio = double(image_width) / double(image_height);  

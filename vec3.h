@@ -68,7 +68,7 @@ class vec3
         auto g = sqrt(scale * e[1]);
         auto b = sqrt(scale * e[2]);
 
-        // Write the tranlated [0,255] value of each color component.
+        // Write the translated [0,255] value of each color component.
         out << static_cast<int>(256 * std::clamp(r, 0.0, 0.999)) << ' '
             << static_cast<int>(256 * std::clamp(g, 0.0, 0.999)) << ' '
             << static_cast<int>(256 * std::clamp(b, 0.0, 0.999)) << '\n';
