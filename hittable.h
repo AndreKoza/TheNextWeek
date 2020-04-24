@@ -39,7 +39,7 @@ struct hit_record
     }
 };
 
-class hitable
+class hittable
 {
     public:
         // Only hits in the interval [t_min, t_max] are considered. t being the t from ray equation p(t) = orig + t*direction
@@ -49,10 +49,10 @@ class hitable
         virtual bool bounding_box(double time0, double time1, aabb& output_box) const = 0;
 };
 
-class flip_face : public hitable
+class flip_face : public hittable
 {
     public:
-        flip_face(shared_ptr<hitable> p)
+        flip_face(shared_ptr<hittable> p)
             : ptr(p) {}
 
         virtual bool hit(const ray& r, double t_min, double t_max, hit_record& rec) const
@@ -70,14 +70,14 @@ class flip_face : public hitable
         }
         
     private:
-        shared_ptr<hitable> ptr;
+        shared_ptr<hittable> ptr;
 };
 
 
-class translate : public hitable
+class translate : public hittable
 {
     public:
-        translate(shared_ptr<hitable> p, const vec3& displacement)
+        translate(shared_ptr<hittable> p, const vec3& displacement)
             : ptr(p), offset(displacement)
         {}
 
@@ -86,7 +86,7 @@ class translate : public hitable
 
 
     private:
-        shared_ptr<hitable> ptr;
+        shared_ptr<hittable> ptr;
         vec3 offset;
 };
 
@@ -114,10 +114,10 @@ bool translate::bounding_box(double time0, double time1, aabb& output_box) const
 }
 
 
-class rotate_y : public hitable
+class rotate_y : public hittable
 {
     public:
-        rotate_y(shared_ptr<hitable> p, double angle);
+        rotate_y(shared_ptr<hittable> p, double angle);
 
         virtual bool hit(const ray& r, double t_min, double t_max, hit_record& rec) const;
         virtual bool bounding_box(double time0, double time1, aabb& output_box) const
@@ -127,14 +127,14 @@ class rotate_y : public hitable
         }
 
     private:
-        shared_ptr<hitable> ptr;
+        shared_ptr<hittable> ptr;
         double sin_theta;
         double cos_theta;
         bool hasBox;
         aabb bbox;
 };
 
-rotate_y::rotate_y(shared_ptr<hitable> p, double angle)
+rotate_y::rotate_y(shared_ptr<hittable> p, double angle)
     : ptr(p)
 {
     auto radians = degrees_to_radians(angle);

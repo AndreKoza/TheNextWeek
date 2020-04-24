@@ -5,7 +5,7 @@
 #include "rtweekend.h"
 #include "bvh.h"
 #include "camera.h"
-#include "hitable_list.h"
+#include "hittable_list.h"
 #include "material.h"
 #include "sphere.h"
 #include "aarect.h"
@@ -14,7 +14,7 @@
 #include "box.h"
 
 
-vec3 ray_color(const ray& r, const vec3& background, const hitable &world, int depth)
+vec3 ray_color(const ray& r, const vec3& background, const hittable &world, int depth)
 {
     hit_record rec;
 
@@ -45,9 +45,9 @@ vec3 ray_color(const ray& r, const vec3& background, const hitable &world, int d
 }
 
 
-hitable_list random_scene()
+hittable_list random_scene()
 {
-    hitable_list world;
+    hittable_list world;
 
     // Lambertian big sphere as "world"
     //world.add(make_shared<sphere>(vec3(0, -1000, 0), 1000, make_shared<lambertian>(make_shared<constant_texture>(vec3(0.5, 0.5, 0.5)))));
@@ -120,12 +120,12 @@ hitable_list random_scene()
 
 
     //return world;
-    return hitable_list(make_shared<bvh_node>(world, 0.0, 1.0));
+    return hittable_list(make_shared<bvh_node>(world, 0.0, 1.0));
 }
 
-hitable_list two_spheres()
+hittable_list two_spheres()
 {
-    hitable_list objects;
+    hittable_list objects;
 
     auto checker = make_shared<checker_texture>(
         make_shared<constant_texture>(vec3(0.2, 0.3, 0.1)),
@@ -138,9 +138,9 @@ hitable_list two_spheres()
     return objects;
 }
 
-hitable_list two_perlin_spheres()
+hittable_list two_perlin_spheres()
 {
-    hitable_list objects;
+    hittable_list objects;
 
     auto pertext = make_shared<noise_texture>(4);
     objects.add(make_shared<sphere>(vec3(0, -1000, 0), 1000, make_shared<lambertian>(pertext)));
@@ -149,7 +149,7 @@ hitable_list two_perlin_spheres()
     return objects;
 }
 
-hitable_list earth()
+hittable_list earth()
 {
     int nx;
     int ny;
@@ -160,12 +160,12 @@ hitable_list earth()
         make_shared<lambertian>(make_shared<image_texture>(texture_data, nx, ny));
     auto globe = make_shared<sphere>(vec3(0, 0, 0), 2, earth_surface);
 
-    return hitable_list(globe);
+    return hittable_list(globe);
 }
 
-hitable_list simple_light()
+hittable_list simple_light()
 {
-    hitable_list objects;
+    hittable_list objects;
 
     auto pertext = make_shared<noise_texture>(4);
     objects.add(make_shared<sphere>(vec3(0, -1000, 0), 1000, make_shared<lambertian>(pertext)));
@@ -178,9 +178,9 @@ hitable_list simple_light()
     return objects;
 }
 
-hitable_list cornell_box()
+hittable_list cornell_box()
 {
-    hitable_list objects;
+    hittable_list objects;
 
     auto red = make_shared<lambertian>(make_shared<constant_texture>(vec3(0.65, 0.05, 0.05)));
     auto white = make_shared<lambertian>(make_shared<constant_texture>(vec3(0.73, 0.73, 0.73)));
@@ -194,12 +194,12 @@ hitable_list cornell_box()
     objects.add(make_shared<xz_rect>(0, 555, 0, 555, 0, white)); // bottom
     objects.add(make_shared<flip_face>(make_shared<xy_rect>(0, 555, 0, 555, 555, white))); // back
 
-    shared_ptr<hitable> box1 = make_shared<box>(vec3(0, 0, 0), vec3(165, 330, 165), white);
+    shared_ptr<hittable> box1 = make_shared<box>(vec3(0, 0, 0), vec3(165, 330, 165), white);
     box1 = make_shared<rotate_y>(box1, 15);
     box1 = make_shared<translate>(box1, vec3(265, 0, 295));
     objects.add(box1);
 
-    shared_ptr<hitable> box2 = make_shared<box>(vec3(0, 0, 0), vec3(165, 165, 165), white);
+    shared_ptr<hittable> box2 = make_shared<box>(vec3(0, 0, 0), vec3(165, 165, 165), white);
     box2 = make_shared<rotate_y>(box2, -18);
     box2 = make_shared<translate>(box2, vec3(130, 0, 65));
     objects.add(box2);
@@ -224,13 +224,13 @@ int main()
 
 
 
-    // hitable *list[5];
+    // hittable *list[5];
     // list[0] = new sphere(vec3(0,0,-1), 0.5, new lambertian(vec3(0.1, 0.2, 0.5))); //(0.8, 0.3, 0.3
     // list[1] = new sphere(vec3(0,-100.5,-1), 100, new lambertian(vec3(0.8, 0.8, 0.0)));
     // list[2] = new sphere(vec3(1,0,-1), 0.5, new metal(vec3(0.8, 0.6, 0.2)));
     // list[3] = new sphere(vec3(-1, 0, -1), 0.5, new dielectric(1.5));
     // list[4] = new sphere(vec3(-1, 0, -1), -0.45, new dielectric(1.5));
-    // hitable *world = new hitable_list(list, 5);
+    // hittable *world = new hittable_list(list, 5);
 
     
 

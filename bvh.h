@@ -1,36 +1,36 @@
 #pragma once
 
 #include "rtweekend.h"
-#include "hitable.h"
-#include "hitable_list.h"
+#include "hittable.h"
+#include "hittable_list.h"
 
 #include <algorithm>
 
-class bvh_node : public hitable
+class bvh_node : public hittable
 {
 	public:
 		bvh_node();
 
-		bvh_node(hitable_list& list, double time0, double time1)
+		bvh_node(hittable_list& list, double time0, double time1)
 			: bvh_node(list.objects, 0, list.objects.size(), time0, time1)
 		{}
 
 		bvh_node(
-			std::vector<shared_ptr<hitable>>& objects,
+			std::vector<shared_ptr<hittable>>& objects,
 			size_t start, size_t end, double time0, double time1);
 
 		virtual bool hit(const ray& r, double tmin, double tmax, hit_record& rec) const;
 		virtual bool bounding_box(double time0, double time1, aabb& output_box) const;
 
 	public:
-		// Children of node are generic hitable: Can be other nodes or leaves (spheres, etc...)
-		shared_ptr<hitable> left;
-		shared_ptr<hitable> right;
+		// Children of node are generic hittable: Can be other nodes or leaves (spheres, etc...)
+		shared_ptr<hittable> left;
+		shared_ptr<hittable> right;
 		aabb box;
 };
 
 // Returns true if min value of a's boxes is less than min value of b's boxes for given axis
-inline bool box_compare(const shared_ptr<hitable> a, const shared_ptr<hitable> b, int axis)
+inline bool box_compare(const shared_ptr<hittable> a, const shared_ptr<hittable> b, int axis)
 {
 	aabb box_a;
 	aabb box_b;
@@ -41,17 +41,17 @@ inline bool box_compare(const shared_ptr<hitable> a, const shared_ptr<hitable> b
 	return box_a.min().e[axis] < box_b.min().e[axis];
 }
 
-bool box_x_compare(const shared_ptr<hitable> a, const shared_ptr<hitable> b)
+bool box_x_compare(const shared_ptr<hittable> a, const shared_ptr<hittable> b)
 {
 	return box_compare(a, b, 0);
 }
 
-bool box_y_compare(const shared_ptr<hitable> a, const shared_ptr<hitable> b)
+bool box_y_compare(const shared_ptr<hittable> a, const shared_ptr<hittable> b)
 {
 	return box_compare(a, b, 1);
 }
 
-bool box_z_compare(const shared_ptr<hitable> a, const shared_ptr<hitable> b)
+bool box_z_compare(const shared_ptr<hittable> a, const shared_ptr<hittable> b)
 {
 	return box_compare(a, b, 2);
 }
@@ -59,7 +59,7 @@ bool box_z_compare(const shared_ptr<hitable> a, const shared_ptr<hitable> b)
 // Constructs BVH: start and end arguments are needed for recursion arguments
 // Goal: Division should be done well: Two children of a node should have smaller bounding boxes
 // than their parent's bounding box (only for speed, not needed for correctness!)
-bvh_node::bvh_node(std::vector<shared_ptr<hitable>>& objects, size_t start, size_t end, double time0, double time1)
+bvh_node::bvh_node(std::vector<shared_ptr<hittable>>& objects, size_t start, size_t end, double time0, double time1)
 {
 	// Randomly choose an axis and define comparator
 	int axis = random_int(0, 2);

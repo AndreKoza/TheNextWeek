@@ -1,9 +1,9 @@
 #pragma once
 
 #include "rtweekend.h"
-#include "hitable.h"
+#include "hittable.h"
 
-class moving_sphere : public hitable
+class moving_sphere : public hittable
 {
 	public:
 		moving_sphere() {}

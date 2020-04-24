@@ -1,10 +1,10 @@
 #pragma once
 
 #include "rtweekend.h"
-#include "hitable.h"
+#include "hittable.h"
 
 
-class sphere : public hitable 
+class sphere : public hittable 
 {
     public:
         sphere() {}

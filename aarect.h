@@ -1,10 +1,10 @@
 #pragma once
 
 #include "rtweekend.h"
-#include "hitable.h"
+#include "hittable.h"
 
 
-class xy_rect : public hitable
+class xy_rect : public hittable
 {
 	public:
 		xy_rect() {}
@@ -32,7 +32,7 @@ class xy_rect : public hitable
 };
 
 
-class xz_rect : public hitable
+class xz_rect : public hittable
 {
 public:
 	xz_rect() {}
@@ -60,7 +60,7 @@ private:
 };
 
 
-class yz_rect : public hitable
+class yz_rect : public hittable
 {
 public:
 	yz_rect() {}

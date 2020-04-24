@@ -1,11 +1,11 @@
 #pragma once
 
 #include "rtweekend.h"
-#include "hitable.h"
-#include "hitable_list.h"
+#include "hittable.h"
+#include "hittable_list.h"
 #include "aarect.h"
 
-class box : public hitable
+class box : public hittable
 {
 	public:
 		box(const vec3& p0, const vec3& p1, shared_ptr<material> mat);
@@ -21,7 +21,7 @@ class box : public hitable
 	private:
 		vec3 box_min;
 		vec3 box_max;
-		hitable_list sides;
+		hittable_list sides;
 };
 
 box::box(const vec3& p0, const vec3& p1, shared_ptr<material> mat)
