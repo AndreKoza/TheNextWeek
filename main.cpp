@@ -362,7 +362,7 @@ hittable_list final_scene()
     auto emat = make_shared<lambertian>(make_shared<image_texture>(tex_data, nx, ny));
     objects.add(make_shared<sphere>(vec3(400, 200, 400), 100, emat));
 
-    auto pertext = make_shared<noise_texture>(4);
+    auto pertext = make_shared<noise_texture>(0.1);
     objects.add(make_shared<sphere>(vec3(220, 280, 300), 80, make_shared<lambertian>(pertext)));
 
     hittable_list boxes2;
@@ -386,7 +386,7 @@ int main()
 
     const int image_width = 600;
     const int image_height = 600;
-    const int samples_per_pixel = 100;
+    const int samples_per_pixel = 50;
     const int max_depth = 50;
 
     const auto aspect_ratio = double(image_width) / double(image_height);  

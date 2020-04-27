@@ -26,7 +26,12 @@ class noise_texture : public texture
 			and use turbulence to adjust the phase (so it shifts x in sin(x)) which makes the stripes undulate.
 			Commenting out straight noise and turbulence, and giving a marble-like effect is:
 			*/
-			return vec3(1, 1, 1) * 0.5 * (1.0 + sin(scale*p.z() + 10*noise.turb(p)));
+			// scale * p.z() is dependent on view direction. For final scene from book two, should be changed to p.x()
+			// return vec3(1, 1, 1) * 0.5 * (1.0 + sin(scale*p.z() + 10*noise.turb(p)));
+
+			// "Pure" Perlin noise (no marble-like texture):
+			 return vec3(1, 1, 1) * noise.turb(scale * p);
+			// return vec3(1, 1, 1) * 0.5 * (1 + noise.turb(scale * p));
 		}
 
 	private:

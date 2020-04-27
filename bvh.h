@@ -131,3 +131,21 @@ bool bvh_node::hit(const ray& r, double tmin, double tmax, hit_record& rec) cons
 
 	return hit_left || hit_right;
 }
+
+// Alternative implementation, according to github issue should be faster. Could not verify...
+//bool bvh_node::hit(const ray& r, double tmin, double tmax, hit_record& rec) const
+//{
+//	if (box.hit(r, tmin, tmax)) 
+//	{
+//		if (left->hit(r, tmin, tmax, rec)) 
+//		{
+//			right->hit(r, tmin, rec.t, rec);
+//			return true;
+//		}
+//		else 
+//		{
+//			return right->hit(r, tmin, tmax, rec);
+//		}
+//	}
+//	return false;
+//}

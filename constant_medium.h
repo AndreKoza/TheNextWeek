@@ -36,9 +36,11 @@ bool constant_medium::hit(const ray& r, double t_min, double t_max, hit_record& 
 	hit_record rec1;
 	hit_record rec2;
 
+	// Test if medium was hit at all (entry point)
 	if (!boundary->hit(r, -infinity, infinity, rec1))
 		return false;
 
+	// Test if ray also exited the medium once it hit
 	if (!boundary->hit(r, rec1.t + 0.0001, infinity, rec2))
 		return false;
 
@@ -55,9 +57,13 @@ bool constant_medium::hit(const ray& r, double t_min, double t_max, hit_record& 
 
 	const auto ray_length = r.direction().length();
 	const auto distance_inside_boundary = (rec2.t - rec1.t) * ray_length;
+
+	/* Rays may scatter at any point. The denser the volume, the more likely that is. The probability
+	   is proportional to the optical density of the volume. Compute the distance (where scattering occurs)
+	   based on density and random number: */
 	const auto hit_distance = neg_inv_density * log(random_double());
 
-	if (hit_distance > distance_inside_boundary)
+	if (hit_distance > distance_inside_boundary) // ... If that distance is outside the volume, then there is no “hit”
 		return false;
 
 	rec.t = rec1.t + hit_distance / ray_length;

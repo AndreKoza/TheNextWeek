@@ -6,9 +6,9 @@
 
 class material;
 
-/* utility function to calculate uv coordinates for a sphere
-   Expects things on the unit sphere (divided by radius) centered at the origin (minus center)
-   Spherical coordinates phi and theta can be calculated by spherical equations (see tutorial for derivations)
+/* Utility function to calculate uv coordinates for a sphere.
+   Expects things on the unit sphere (divided by radius) centered at the origin (minus center).
+   Spherical coordinates phi and theta can be calculated by spherical equations (see tutorial for derivations).
 */
 void get_sphere_uv(const vec3& p, double& u, double& v)
 {
